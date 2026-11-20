@@ -1,0 +1,209 @@
+// SysSelect GDSS — Prisma schema
+// Setara dengan docs/schema.sql (10 tabel).
+// MySQL 8.4 · SAW individual + Borda Count konsensus.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum CriteriaType {
+  benefit
+  cost
+}
+
+enum SessionStatus {
+  setup
+  penilaian
+  konsensus
+  sah
+}
+
+/// Tepat 3 akun decision maker. uq_rank menjamin satu pemegang per rank.
+model User {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique @db.VarChar(50)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  namaLengkap  String   @map("nama_lengkap") @db.VarChar(120)
+  jabatan      String   @db.VarChar(80)
+  rankJabatan  Int      @unique @map("rank_jabatan") @db.TinyInt
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  criteriaUpdated  Criteria[]   @relation("CriteriaUpdatedBy")
+  vendorsCreated   Vendor[]     @relation("VendorCreatedBy")
+  sessionsOpened   Session[]    @relation("SessionOpenedBy")
+  sessionsRatified Session[]    @relation("SessionRatifiedBy")
+  assessments      Assessment[]
+  submissions      Submission[]
+  sawResults       SawResult[]
+  auditLogs        AuditLog[]
+
+  @@map("users")
+}
+
+/// 5 kriteria. Validasi SUM(bobot)=100 di application layer.
+model Criteria {
+  id        Int          @id @default(autoincrement())
+  kode      String       @unique @db.VarChar(8)
+  nama      String       @db.VarChar(160)
+  bobot     Decimal      @db.Decimal(5, 2)
+  tipe      CriteriaType
+  satuan    String       @default("skor") @db.VarChar(24)
+  urutan    Int          @db.TinyInt
+  updatedBy Int?         @map("updated_by")
+  updatedAt DateTime     @default(now()) @updatedAt @map("updated_at")
+
+  updatedByUser User?        @relation("CriteriaUpdatedBy", fields: [updatedBy], references: [id], onDelete: Restrict)
+  assessments   Assessment[]
+
+  @@map("criteria")
+}
+
+/// 4 alternatif vendor.
+model Vendor {
+  id        Int      @id @default(autoincrement())
+  kode      String   @unique @db.VarChar(8)
+  nama      String   @db.VarChar(160)
+  profil    String?  @db.Text
+  createdBy Int?     @map("created_by")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  createdByUser User?         @relation("VendorCreatedBy", fields: [createdBy], references: [id], onDelete: Restrict)
+  assessments   Assessment[]
+  sawResults    SawResult[]
+  bordaResults  BordaResult[]
+  sessionsWon   Session[]     @relation("SessionWinner")
+
+  @@map("vendors")
+}
+
+/// Satu siklus keputusan. Scope aplikasi: satu sesi aktif.
+model Session {
+  id             Int           @id @default(autoincrement())
+  nama           String        @db.VarChar(120)
+  status         SessionStatus @default(setup)
+  openedBy       Int?          @map("opened_by")
+  openedAt       DateTime?     @map("opened_at")
+  ratifiedBy     Int?          @map("ratified_by")
+  ratifiedAt     DateTime?     @map("ratified_at")
+  winnerVendorId Int?          @map("winner_vendor_id")
+  createdAt      DateTime      @default(now()) @map("created_at")
+
+  openedByUser   User?         @relation("SessionOpenedBy", fields: [openedBy], references: [id], onDelete: Restrict)
+  ratifiedByUser User?         @relation("SessionRatifiedBy", fields: [ratifiedBy], references: [id], onDelete: Restrict)
+  winnerVendor   Vendor?       @relation("SessionWinner", fields: [winnerVendorId], references: [id], onDelete: Restrict)
+
+  assessments  Assessment[]
+  submissions  Submission[]
+  sawResults   SawResult[]
+  bordaWeights BordaWeight[]
+  bordaResults BordaResult[]
+  auditLogs    AuditLog[]
+
+  @@map("sessions")
+}
+
+/// Matriks keputusan mentah. 4 vendor x 5 kriteria x 3 DM = 60 baris.
+model Assessment {
+  id          Int      @id @default(autoincrement())
+  sessionId   Int      @map("session_id")
+  userId      Int      @map("user_id")
+  vendorId    Int      @map("vendor_id")
+  criterionId Int      @map("criterion_id")
+  nilai       Decimal  @db.Decimal(10, 2)
+  alasan      String?  @db.Text
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+
+  session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  vendor    Vendor   @relation(fields: [vendorId], references: [id], onDelete: Restrict)
+  criterion Criteria @relation(fields: [criterionId], references: [id], onDelete: Restrict)
+
+  @@unique([sessionId, userId, vendorId, criterionId], map: "uq_assess")
+  @@index([sessionId, userId], map: "idx_assess_lookup")
+  @@map("assessments")
+}
+
+/// Penanda DM selesai menilai. Guard 3/3 dari COUNT(submissions).
+model Submission {
+  id          Int      @id @default(autoincrement())
+  sessionId   Int      @map("session_id")
+  userId      Int      @map("user_id")
+  submittedAt DateTime @default(now()) @map("submitted_at")
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@unique([sessionId, userId], map: "uq_submit")
+  @@map("submissions")
+}
+
+/// Skor preferensi SAW per DM. Snapshot; tidak dihitung ulang setelah sah.
+model SawResult {
+  id             Int      @id @default(autoincrement())
+  sessionId      Int      @map("session_id")
+  userId         Int      @map("user_id")
+  vendorId       Int      @map("vendor_id")
+  skorPreferensi Decimal  @map("skor_preferensi") @db.Decimal(12, 6)
+  peringkat      Int      @db.TinyInt
+  computedAt     DateTime @default(now()) @map("computed_at")
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Restrict)
+  vendor  Vendor  @relation(fields: [vendorId], references: [id], onDelete: Restrict)
+
+  @@unique([sessionId, userId, vendorId], map: "uq_saw")
+  @@index([sessionId, userId, peringkat], map: "idx_saw_rank")
+  @@map("saw_results")
+}
+
+/// Bobot Borda per posisi peringkat: n - peringkat + 1.
+model BordaWeight {
+  id        Int @id @default(autoincrement())
+  sessionId Int @map("session_id")
+  peringkat Int @db.TinyInt
+  bobot     Int @db.TinyInt
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, peringkat], map: "uq_bw")
+  @@map("borda_weights")
+}
+
+/// Hasil konsensus kelompok. SUM(nilai_borda) = 1.
+model BordaResult {
+  id             Int      @id @default(autoincrement())
+  sessionId      Int      @map("session_id")
+  vendorId       Int      @map("vendor_id")
+  poinBorda      Decimal  @map("poin_borda") @db.Decimal(14, 6)
+  nilaiBorda     Decimal  @map("nilai_borda") @db.Decimal(10, 8)
+  peringkatAkhir Int      @map("peringkat_akhir") @db.TinyInt
+  computedAt     DateTime @default(now()) @map("computed_at")
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  vendor  Vendor  @relation(fields: [vendorId], references: [id], onDelete: Restrict)
+
+  @@unique([sessionId, vendorId], map: "uq_borda")
+  @@index([sessionId, peringkatAkhir], map: "idx_borda_rank")
+  @@map("borda_results")
+}
+
+/// Rekam jejak semua aksi.
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  sessionId Int?     @map("session_id")
+  userId    Int      @map("user_id")
+  aksi      String   @db.VarChar(48)
+  detail    Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  session Session? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  user    User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([sessionId, createdAt], map: "idx_log_sess")
+  @@map("audit_logs")
+}
