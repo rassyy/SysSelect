@@ -1,0 +1,180 @@
+@import "tailwindcss";
+
+/* ============================================================
+   SysSelect GDSS — Design tokens (sumber: docs/tokens.json)
+   Light-only. Tidak ada dark mode.
+   ============================================================ */
+:root {
+  /* Netral (~95% permukaan) */
+  --canvas: #faf9f7;
+  --surface: #ffffff;
+  --surface-2: #fcfbfa;
+  --track: #f4f2ef;
+  --hairline: #e8e4de;
+  --hairline-2: #d8d2c8;
+  --ink: #1a1815;
+  --ink-2: #6b655c;
+  --ink-3: #9a938a;
+
+  /* Identitas DM — teks & badge */
+  --dm-cto: #2d4e8f;
+  --dm-headit: #7e225e;
+  --dm-finance: #9a5b0a;
+  --tint-cto: #edf1f8;
+  --tint-headit: #f7edf3;
+  --tint-finance: #faf1e6;
+
+  /* Fill chart — sengaja beda dari warna teks (DESIGN.md 1.6) */
+  --fill-cto: #1e3a5f;
+  --fill-headit: #9b4c77;
+  --fill-finance: #efd3a8;
+
+  /* Mode kontras tinggi */
+  --hc-cto: #176fea;
+  --hc-headit: #4c0b31;
+  --hc-finance: #f8cf95;
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-track: var(--track);
+  --color-hairline: var(--hairline);
+  --color-hairline-2: var(--hairline-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+
+  --color-dm-cto: var(--dm-cto);
+  --color-dm-headit: var(--dm-headit);
+  --color-dm-finance: var(--dm-finance);
+  --color-tint-cto: var(--tint-cto);
+  --color-tint-headit: var(--tint-headit);
+  --color-tint-finance: var(--tint-finance);
+
+  --color-fill-cto: var(--fill-cto);
+  --color-fill-headit: var(--fill-headit);
+  --color-fill-finance: var(--fill-finance);
+
+  --color-hc-cto: var(--hc-cto);
+  --color-hc-headit: var(--hc-headit);
+  --color-hc-finance: var(--hc-finance);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
+
+  --radius-card: 10px;
+  --radius-input: 7px;
+  --radius-badge: 5px;
+
+  --shadow-card: 0 1px 2px rgba(26, 24, 21, 0.04),
+    0 4px 14px -6px rgba(26, 24, 21, 0.07);
+  --shadow-raised: 0 2px 4px rgba(26, 24, 21, 0.05),
+    0 12px 28px -10px rgba(26, 24, 21, 0.13);
+}
+
+/* ---------- Base ---------- */
+html {
+  background: var(--canvas);
+  color: var(--ink);
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgba(26, 24, 21, 0.12);
+}
+
+/* Grain canvas — noise 2.5%, tidak boleh >3% (DESIGN.md 3) */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+
+/* ---------- Utilities ---------- */
+.num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.label-caps {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* Resep kartu wajib (DESIGN.md 3) */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  position: relative;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  pointer-events: none;
+}
+
+.card-raised {
+  box-shadow: var(--shadow-raised);
+}
+
+.focus-ring:focus-visible {
+  outline: none;
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(26, 24, 21, 0.07);
+}
+
+/* Tipografi (DESIGN.md 2) */
+.text-display {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.text-h2 {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.text-small {
+  font-size: 12.5px;
+}
+
+.text-hero-num {
+  font-family: var(--font-mono);
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
