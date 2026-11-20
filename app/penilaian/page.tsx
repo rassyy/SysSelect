@@ -61,6 +61,7 @@ export default async function PenilaianPage() {
       </div>
 
       <PenilaianGrid
+        userId={user.id}
         initialCriteria={criteria.map((c) => ({
           id: c.id,
           kode: c.kode,

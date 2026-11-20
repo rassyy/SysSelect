@@ -14,7 +14,8 @@
     "test:t06": "tsx scripts/test-t06.ts",
     "test:t08": "tsx scripts/test-t08.ts",
     "test:t08:http": "tsx scripts/test-t08-http.ts",
-    "test:t09": "tsx scripts/test-t09.ts"
+    "test:t09": "tsx scripts/test-t09.ts",
+    "test:t10": "tsx scripts/test-t10.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

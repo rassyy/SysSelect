@@ -1,12 +1,13 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge, DmRankBadge, type DmRole } from "@/components/ui/badge";
-import { Lock, ShieldCheck, CheckCircle2, AlertCircle, Info } from "lucide-react";
+import { Lock, LockOpen, ShieldCheck, CheckCircle2, AlertCircle, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type CriterionData = {
@@ -51,6 +52,7 @@ const ROLE_BY_RANK: Record<number, DmRole> = {
 };
 
 export function PenilaianGrid({
+  userId,
   initialCriteria,
   initialVendors,
   initialAssessments,
@@ -58,6 +60,7 @@ export function PenilaianGrid({
   otherDms,
   sessionStatus,
 }: {
+  userId: number;
   initialCriteria: CriterionData[];
   initialVendors: VendorData[];
   initialAssessments: AssessmentData[];
@@ -67,11 +70,16 @@ export function PenilaianGrid({
 }) {
   const router = useRouter();
   const isReadOnly = initialSubmitted || sessionStatus !== "penilaian";
+  // Setelah konsensus dibuka, server mengirim nilai SEMUA DM (blind dibuka
+  // sesuai status). Grid edit tetap hanya milik user login — nilai DM lain
+  // dibaca di halaman /konsensus, bukan ditimpa ke sel editable.
+  const konsensusTerbuka = sessionStatus === "konsensus" || sessionStatus === "sah";
+  const ownAssessments = initialAssessments.filter((a) => a.userId === userId);
 
   // Map cell values: key = `${vendorId}_${criterionId}`
   const [values, setValues] = React.useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
-    for (const a of initialAssessments) {
+    for (const a of ownAssessments) {
       initial[`${a.vendorId}_${a.criterionId}`] = String(a.nilai);
     }
     return initial;
@@ -80,7 +88,7 @@ export function PenilaianGrid({
   // Map vendor reasons: key = vendorId
   const [reasons, setReasons] = React.useState<Record<number, string>>(() => {
     const initial: Record<number, string> = {};
-    for (const a of initialAssessments) {
+    for (const a of ownAssessments) {
       if (a.alasan) initial[a.vendorId] = a.alasan;
     }
     return initial;
@@ -252,9 +260,21 @@ export function PenilaianGrid({
       <div className="flex items-start gap-3 rounded-card border border-hairline bg-surface-2 p-4 text-[13px] leading-relaxed text-ink">
         <ShieldCheck size={18} strokeWidth={1.5} className="mt-0.5 shrink-0 text-ink" />
         <div className="min-w-0">
-          <p className="font-medium text-ink">Prinsip Blind Assessment</p>
+          <p className="font-medium text-ink">
+            {konsensusTerbuka ? "Konsensus Telah Dibuka" : "Prinsip Blind Assessment"}
+          </p>
           <p className="text-ink-2">
-            Penilaian bersifat individual. Nilai decision maker lain tidak dapat dilihat sampai sesi konsensus dibuka untuk mencegah anchoring bias.
+            {konsensusTerbuka ? (
+              <>
+                Nilai seluruh decision maker kini dapat dibaca semua role.{" "}
+                <Link href="/konsensus" className="font-medium text-ink underline underline-offset-2">
+                  Lihat perbandingan di halaman Konsensus
+                </Link>
+                . Grid Anda tetap terkunci permanen.
+              </>
+            ) : (
+              "Penilaian bersifat individual. Nilai decision maker lain tidak dapat dilihat sampai sesi konsensus dibuka untuk mencegah anchoring bias."
+            )}
           </p>
         </div>
       </div>
@@ -445,12 +465,25 @@ export function PenilaianGrid({
                 <CardContent className="p-4 pt-0">
                   <div className="mt-2 flex items-center justify-between rounded-badge border border-hairline bg-surface px-3 py-2 text-[12px]">
                     <div className="flex items-center gap-2 text-ink-2">
-                      <Lock size={14} strokeWidth={1.5} className="text-ink-3" />
-                      <span>Nilai Tersegel</span>
+                      {konsensusTerbuka ? (
+                        <LockOpen size={14} strokeWidth={1.5} className="text-ink-3" />
+                      ) : (
+                        <Lock size={14} strokeWidth={1.5} className="text-ink-3" />
+                      )}
+                      <span>{konsensusTerbuka ? "Terbuka di Konsensus" : "Nilai Tersegel"}</span>
                     </div>
-                    <span className="mono text-[11px] font-medium text-ink-3">
-                      {dm.submitted ? "Tersimpan" : "Sedang Mengisi"}
-                    </span>
+                    {konsensusTerbuka ? (
+                      <Link
+                        href="/konsensus"
+                        className="mono text-[11px] font-medium text-ink underline underline-offset-2"
+                      >
+                        Lihat nilai
+                      </Link>
+                    ) : (
+                      <span className="mono text-[11px] font-medium text-ink-3">
+                        {dm.submitted ? "Tersimpan" : "Sedang Mengisi"}
+                      </span>
+                    )}
                   </div>
                 </CardContent>
               </Card>
