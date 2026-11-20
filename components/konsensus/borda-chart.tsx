@@ -29,12 +29,12 @@ function fillVar(role: ChartSegment["role"], hc: boolean): string {
 
 /** Warna label di atas fill: finance terang -> tinta, lainnya putih (DESIGN 6.3). */
 function labelColor(role: ChartSegment["role"]): string {
-  return role === "finance" ? "var(--ink)" : "#FFFFFF";
+  return role === "finance" ? "var(--ink)" : "var(--surface)";
 }
 
-function tooltipText(seg: ChartSegment): string {
+function tooltipText(seg: ChartSegment, vendor: string): string {
   return (
-    `${seg.namaDm} — ${seg.jabatan}. ` +
+    `${vendor}. ${seg.namaDm} — ${seg.jabatan}. ` +
     `Skor SAW ${seg.skorSaw.toFixed(6)}, peringkat ${seg.peringkatDm}, ` +
     `kontribusi ${seg.kontribusi.toFixed(2)} poin (${seg.lebarPct.toFixed(2)}%).`
   );
@@ -42,23 +42,38 @@ function tooltipText(seg: ChartSegment): string {
 
 function Segmen({
   seg,
+  vendor,
   isFirst,
   isLast,
   hc,
-  aktif,
-  onAktif,
 }: {
   seg: ChartSegment;
+  vendor: string;
   isFirst: boolean;
   isLast: boolean;
   hc: boolean;
-  aktif: boolean;
-  onAktif: (key: string | null) => void;
 }) {
   const ref = React.useRef<HTMLDivElement>(null);
+  const [hovered, setHovered] = React.useState(false);
+  const [focused, setFocused] = React.useState(false);
+  const hoverTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const aktif = hovered || focused;
+  const tooltipId = `tooltip-${vendor}-${seg.userId}`;
+
+  function masukPointer() {
+    if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    setHovered(true);
+  }
+  function keluarPointer() {
+    if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    hoverTimer.current = setTimeout(() => setHovered(false), 180);
+  }
+
+  React.useEffect(() => () => {
+    if (hoverTimer.current) clearTimeout(hoverTimer.current);
+  }, []);
   // Label diukur saat RUNTIME. Desktop normal: semua label tampil.
   const [muat, setMuat] = React.useState(true);
-  const key = `${seg.userId}`;
 
   React.useEffect(() => {
     const el = ref.current;
@@ -78,14 +93,23 @@ function Segmen({
     <div
       ref={ref}
       data-testid="chart-segment"
+      role="img"
+      aria-roledescription="kontribusi Borda"
       data-role={seg.role}
       data-initials={seg.initials}
       tabIndex={0}
-      aria-label={tooltipText(seg)}
-      onMouseEnter={() => onAktif(key)}
-      onMouseLeave={() => onAktif(null)}
-      onFocus={() => onAktif(key)}
-      onBlur={() => onAktif(null)}
+      aria-label={tooltipText(seg, vendor)}
+      aria-describedby={aktif ? tooltipId : undefined}
+      onMouseEnter={masukPointer}
+      onMouseLeave={keluarPointer}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      onKeyDown={(event) => {
+        if (event.key === "Escape") {
+          setHovered(false);
+          setFocused(false);
+        }
+      }}
       className={cn(
         "relative flex h-full items-center justify-center outline-none",
         isFirst && "rounded-l-[5px]",
@@ -117,12 +141,15 @@ function Segmen({
 
       {aktif ? (
         <div
+          id={tooltipId}
           data-testid="segment-tooltip"
           role="tooltip"
-          className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-50 -translate-x-1/2 rounded-input border border-hairline bg-surface px-3 py-2 text-left shadow-raised"
+          className="absolute bottom-full left-1/2 z-50 mb-1 max-w-[min(280px,calc(100vw-24px))] -translate-x-1/2 rounded-input border border-hairline bg-surface px-3 py-2 text-left shadow-raised"
+          onMouseEnter={masukPointer}
+          onMouseLeave={keluarPointer}
         >
-          <p className="whitespace-nowrap text-[12px] font-semibold text-ink">{seg.namaDm}</p>
-          <p className="whitespace-nowrap text-[11px] text-ink-2">{seg.jabatan}</p>
+          <p className="text-[12px] font-semibold text-ink">{vendor} · {seg.namaDm}</p>
+          <p className="text-[11px] text-ink-2">{seg.jabatan}</p>
           <div className="mono num mt-1.5 space-y-0.5 border-t border-hairline pt-1.5 text-[11px] text-ink">
             <p className="flex justify-between gap-5">
               <span className="text-ink-2">Skor SAW</span>
@@ -150,15 +177,11 @@ function BarisChart({
   urutan,
   hc,
   playing,
-  aktif,
-  onAktif,
 }: {
   row: BordaRow;
   urutan: number;
   hc: boolean;
   playing: boolean;
-  aktif: string | null;
-  onAktif: (key: string | null) => void;
 }) {
   const winner = row.peringkat === 1;
 
@@ -222,11 +245,10 @@ function BarisChart({
             <Segmen
               key={seg.userId}
               seg={seg}
+              vendor={row.kode}
               isFirst={i === 0}
               isLast={i === row.segments.length - 1}
               hc={hc}
-              aktif={aktif === `${row.vendorId}:${seg.userId}`}
-              onAktif={(k) => onAktif(k === null ? null : `${row.vendorId}:${k}`)}
             />
           ))}
         </motion.div>
@@ -257,7 +279,6 @@ export function BordaChart({
   playKey: number;
 }) {
   const [hc, setHc] = React.useState(false);
-  const [aktif, setAktif] = React.useState<string | null>(null);
 
   // Preferensi kontras tinggi tersimpan di localStorage (DESIGN 6.5).
   React.useEffect(() => {
@@ -320,8 +341,6 @@ export function BordaChart({
             urutan={i}
             hc={hc}
             playing={playing}
-            aktif={aktif}
-            onAktif={setAktif}
           />
         ))}
       </div>

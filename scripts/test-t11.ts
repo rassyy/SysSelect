@@ -86,6 +86,10 @@ async function main() {
     });
     await page.goto(`${BASE}/konsensus`, { waitUntil: "networkidle0" });
     await page.waitForSelector('[data-testid="borda-chart"]');
+    await page.waitForFunction(
+      () => document.querySelector('[data-testid="konsensus-view"]')?.getAttribute("data-reveal") === "final",
+      { timeout: 6000 },
+    );
 
     // 1. Batang proporsional, track 22px, urutan V3 > V1 > V4 > V2.
     const data = await chartData(page);
@@ -121,14 +125,33 @@ async function main() {
     }
     console.log("  OK 3: legenda CTO/HIT/FIN + nama jabatan lengkap");
 
-    // 4. Fokus keyboard memunculkan tooltip dengan data DM, skor, rank, kontribusi.
-    await page.focus('[data-testid="borda-row"][data-vendor="V3"] [data-testid="chart-segment"][data-role="cto"]');
-    await page.waitForSelector('[data-testid="segment-tooltip"]');
-    const tooltip = await page.$eval('[data-testid="segment-tooltip"]', (el) => el.textContent ?? "");
-    for (const text of ["Chief Technology Officer", "Skor SAW", "Peringkat", "Kontribusi", "poin"]) {
+    // 4. Tab nyata mencapai segmen; tooltip harus menyebut vendor + angka fixture.
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    for (let i = 0; i < 60; i++) {
+      const reached = await page.evaluate(() => {
+        const el = document.activeElement as HTMLElement | null;
+        return el?.matches('[data-testid="chart-segment"][data-role="cto"]') &&
+          el.closest('[data-vendor="V3"]') !== null;
+      });
+      if (reached) break;
+      await page.keyboard.press("Tab");
+    }
+    assert.equal(await page.evaluate(() => {
+      const el = document.activeElement as HTMLElement | null;
+      return el?.matches('[data-testid="chart-segment"][data-role="cto"]') && el.closest('[data-vendor="V3"]') !== null;
+    }), true, "Tab harus mencapai segmen CTO pada V3");
+    await page.waitForSelector('[data-testid="borda-row"][data-vendor="V3"] [data-testid="segment-tooltip"]');
+    const tooltip = await page.$eval('[data-testid="borda-row"][data-vendor="V3"] [data-testid="segment-tooltip"]', (el) => el.textContent ?? "");
+    for (const text of ["V3", "Chief Technology Officer", "Skor SAW", "90.883524", "Peringkat", "2", "Kontribusi", "272.65 poin"]) {
       assert.ok(tooltip.includes(text), `tooltip harus memuat ${text}`);
     }
-    console.log("  OK 4: segmen fokus -> tooltip nama DM, skor SAW, peringkat, kontribusi");
+    await page.keyboard.press("Escape");
+    assert.equal(await page.$('[data-testid="borda-row"][data-vendor="V3"] [data-testid="segment-tooltip"]'), null, "Escape menutup tooltip");
+    const seg = await page.$('[data-testid="borda-row"][data-vendor="V3"] [data-testid="chart-segment"][data-role="cto"]');
+    assert.ok(seg);
+    await seg.hover();
+    await page.waitForSelector('[data-testid="borda-row"][data-vendor="V3"] [data-testid="segment-tooltip"]');
+    console.log("  OK 4: Tab + hover tooltip akurat (V3/CTO/90.883524/rank2/272.65 poin); Escape menutup");
 
     // Screenshot default chart. Kembali fokus netral agar tooltip tidak menutupi.
     await page.click("h1");
