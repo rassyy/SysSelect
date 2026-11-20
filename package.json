@@ -9,7 +9,11 @@
     "lint": "eslint",
     "db:verify": "tsx scripts/db-verify.ts",
     "db:seed:golden": "tsx prisma/seed.ts",
-    "db:reset:demo": "tsx scripts/reset-demo.ts"
+    "db:reset:demo": "tsx scripts/reset-demo.ts",
+    "test:t05": "tsx scripts/test-t05.ts",
+    "test:t06": "tsx scripts/test-t06.ts",
+    "test:t08": "tsx scripts/test-t08.ts",
+    "test:t08:http": "tsx scripts/test-t08-http.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
