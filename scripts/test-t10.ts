@@ -124,6 +124,18 @@ async function main() {
     console.log("  OK 2: Borda seri — total poin 900 (RANK() kembar akan menghasilkan 1000), SUM(nilai)=1");
   }
 
+  // === Uji 2b: input Borda rusak harus ditolak, bukan dijumlahkan diam-diam ===
+  {
+    const base: BarisSaw[] = [1, 2, 3, 4].map((v, i) => ({
+      userId: 1, vendorId: v, skor: 100 - i * 10, peringkat: i + 1,
+    }));
+    assert.throws(() => hitungBorda([...base, { ...base[0] }], bobot, [1, 2, 3, 4]), /duplikat/);
+    const kembar = base.map((r) => ({ ...r, peringkat: r.vendorId <= 2 ? 1 : r.peringkat }));
+    assert.throws(() => hitungBorda(kembar, bobot, [1, 2, 3, 4]), /permutasi/);
+    assert.throws(() => hitungBorda(base.slice(0, 3), bobot, [1, 2, 3, 4]), /mencakup/);
+    console.log("  OK 2b: input rusak ditolak — baris duplikat, peringkat kembar, DM tidak lengkap");
+  }
+
   // === Uji endpoint: prasyarat & pemulihan ===
   const cto = await prisma.user.findUniqueOrThrow({ where: { username: "cto" } });
   const headit = await prisma.user.findUniqueOrThrow({ where: { username: "headit" } });
@@ -181,13 +193,17 @@ async function main() {
     assert.equal(res.status, 200);
   }
   {
-    const res = await bukaKonsensus(req("http://localhost:3000/api/konsensus/buka", tokens[cto.id], { method: "POST" }));
-    assert.equal(res.status, 200, "3 submissions harus sukses");
-    const data = await res.json();
+    // Dua POST paralel: lock baris sesi membuat tepat SATU yang menang.
+    const [a, b] = await Promise.all([
+      bukaKonsensus(req("http://localhost:3000/api/konsensus/buka", tokens[cto.id], { method: "POST" })),
+      bukaKonsensus(req("http://localhost:3000/api/konsensus/buka", tokens[cto.id], { method: "POST" })),
+    ]);
+    assert.deepEqual([a.status, b.status].sort(), [200, 409], "paralel: tepat satu 200, satu 409");
+    const data = await (a.status === 200 ? a : b).json();
     assert.equal(data.status, "konsensus");
     assert.equal(data.sawCount, 12);
     assert.equal(data.bordaCount, 4);
-    console.log("  OK 5: buka konsensus 3/3 -> 200, saw_results=12, borda_results=4");
+    console.log("  OK 5: dua POST buka konsensus paralel -> [200, 409], saw_results=12, borda_results=4");
   }
   {
     const sessionDb = await prisma.session.findUniqueOrThrow({ where: { id: session.id } });
@@ -224,6 +240,23 @@ async function main() {
     assert.equal(winner?.vendorId, vendors[2].id, "pemenang DB harus V3");
     assert.equal(sessionDb.winnerVendorId, vendors[2].id, "session.winner_vendor_id = V3");
     console.log(`  OK 5b: borda_results cocok fixture — total=${totalPoinDb.toFixed(6)}, SUM(nilai)=${sumNilaiDb.toFixed(8)}, pemenang=V3`);
+
+    // Snapshot harus bisa direproduksi PERSIS dari saw_results tersimpan
+    // (kontrak presisi: skor dibulatkan 6 desimal sebelum Borda).
+    const weightsDb = await prisma.bordaWeight.findMany({ where: { sessionId: session.id } });
+    const bobotDb: Record<number, number> = {};
+    for (const w of weightsDb) bobotDb[w.peringkat] = w.bobot;
+    const ulang = hitungBorda(
+      sawDb.map((r) => ({ userId: r.userId, vendorId: r.vendorId, skor: Number(r.skorPreferensi), peringkat: r.peringkat })),
+      bobotDb,
+      vendors.map((v) => v.id),
+    );
+    vendors.forEach((v, vi) => {
+      const row = bordaDb.find((r) => r.vendorId === v.id)!;
+      dekat(ulang.poin[vi], Number(row.poinBorda), `reproduksi poin ${v.kode}`, 1e-6);
+      dekat(ulang.nilai[vi], Number(row.nilaiBorda), `reproduksi nilai ${v.kode}`, 1e-8);
+    });
+    console.log("  OK 5b2: hitungBorda dari saw_results tersimpan mereproduksi poin/nilai (tol 1e-6/1e-8)");
 
     const audits = await prisma.auditLog.findMany({
       where: { sessionId: session.id, aksi: { in: ["buka_konsensus", "hitung_borda"] } },

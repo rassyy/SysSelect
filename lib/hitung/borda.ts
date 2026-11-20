@@ -62,13 +62,36 @@ export function hitungBorda(
   }
 
   const idx = new Map(ids.map((id, i) => [id, i]));
-  const grup: number[][] = ids.map(() => new Array<number>(n).fill(0));
+
+  // Input rusak harus DITOLAK, bukan diam-diam dijumlahkan:
+  // satu baris per (DM, vendor), dan peringkat tiap DM permutasi 1..n.
+  const perDm = new Map<number, { vendors: Set<number>; ranks: number[] }>();
   for (const row of saw) {
     const i = idx.get(row.vendorId);
     if (i === undefined) {
       throw new Error(`hitungBorda: vendor ${row.vendorId} tidak dikenal.`);
     }
-    grup[i][row.peringkat - 1] += row.skor;
+    const dm = perDm.get(row.userId) ?? { vendors: new Set<number>(), ranks: [] };
+    if (dm.vendors.has(row.vendorId)) {
+      throw new Error(`hitungBorda: baris duplikat DM ${row.userId} vendor ${row.vendorId}.`);
+    }
+    dm.vendors.add(row.vendorId);
+    dm.ranks.push(row.peringkat);
+    perDm.set(row.userId, dm);
+  }
+  for (const [userId, dm] of perDm) {
+    if (dm.vendors.size !== n) {
+      throw new Error(`hitungBorda: DM ${userId} hanya mencakup ${dm.vendors.size}/${n} vendor.`);
+    }
+    const urut = [...dm.ranks].sort((a, b) => a - b);
+    if (urut.some((r, i) => r !== i + 1)) {
+      throw new Error(`hitungBorda: peringkat DM ${userId} bukan permutasi unik 1..${n}.`);
+    }
+  }
+
+  const grup: number[][] = ids.map(() => new Array<number>(n).fill(0));
+  for (const row of saw) {
+    grup[idx.get(row.vendorId)!][row.peringkat - 1] += row.skor;
   }
 
   const poin = grup.map((baris) =>

@@ -9,6 +9,7 @@ import { recordAudit } from "@/lib/audit";
 import {
   apiError,
   apiJson,
+  ApiTolak,
   isApiFailure,
   readJson,
   requireApiUser,
@@ -104,101 +105,88 @@ export async function PATCH(request: NextRequest) {
   const user = await requireApiUser(request);
   if (isApiFailure(user)) return apiError(user.status, user.error);
 
-  const session = await prisma.session.findFirst({ orderBy: { id: "asc" } });
-  if (!session) return apiError(404, "Belum ada sesi.");
-  if (session.status !== "penilaian") {
-    return apiError(409, "Pengisian nilai hanya diperbolehkan pada fase penilaian.");
-  }
-
-  // GUARD SUBMISSION: tolak tulis bila user sudah submit
-  const existingSubmission = await prisma.submission.findUnique({
-    where: { sessionId_userId: { sessionId: session.id, userId: user.id } },
-  });
-  if (existingSubmission) {
-    return apiError(403, "Penilaian sudah disubmit dan terkunci permanen.");
-  }
-
   const body = (await readJson(request)) as {
     vendorId?: number;
     criterionId?: number;
     nilai?: number;
     alasan?: string;
   } | null;
-
-  if (!body || typeof body !== "object") {
-    return apiError(400, "Body JSON tidak valid.");
-  }
-
+  if (!body || typeof body !== "object") return apiError(400, "Body JSON tidak valid.");
   const { vendorId, criterionId, nilai, alasan } = body;
+  if (typeof vendorId !== "number") return apiError(400, "vendorId wajib disertakan.");
 
-  if (typeof vendorId !== "number") {
-    return apiError(400, "vendorId wajib disertakan.");
+  if (!(criterionId === undefined && typeof alasan === "string")) {
+    if (typeof criterionId !== "number" || typeof nilai !== "number" || !Number.isFinite(nilai)) {
+      return apiError(400, "criterionId dan nilai numerik valid wajib disertakan.");
+    }
+    if (nilai <= 0) return apiError(400, "Nilai harus lebih besar dari 0.");
   }
 
-  // Kasus 1: Update alasan per vendor
-  if (criterionId === undefined && typeof alasan === "string") {
-    // Update kolom alasan pada seluruh assessment vendor ini untuk user ini
-    await prisma.assessment.updateMany({
-      where: { sessionId: session.id, userId: user.id, vendorId },
-      data: { alasan },
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      // Same lock as submit and buka-konsensus: writes cannot pass a stale guard.
+      const [session] = await tx.$queryRaw<Array<{ id: number }>>`SELECT id FROM sessions ORDER BY id ASC LIMIT 1 FOR UPDATE`;
+      if (!session) throw new ApiTolak(404, "Belum ada sesi aktif.");
+      const active = await tx.session.findUniqueOrThrow({ where: { id: session.id } });
+      if (active.status !== "penilaian") {
+        throw new ApiTolak(409, "Pengisian nilai hanya diperbolehkan pada fase penilaian.");
+      }
+      const submission = await tx.submission.findUnique({
+        where: { sessionId_userId: { sessionId: active.id, userId: user.id } },
+      });
+      if (submission) throw new ApiTolak(403, "Penilaian sudah disubmit dan terkunci permanen.");
+
+      // Update alasan vendor.
+      if (criterionId === undefined && typeof alasan === "string") {
+        await tx.assessment.updateMany({
+          where: { sessionId: active.id, userId: user.id, vendorId },
+          data: { alasan },
+        });
+        return { type: "alasan" as const };
+      }
+
+      // Update satu sel nilai.
+      const criterion = await tx.criteria.findUnique({ where: { id: criterionId! } });
+      if (!criterion) throw new ApiTolak(404, "Kriteria tidak ditemukan.");
+      if (criterion.kode !== "C1" && (nilai! < 1 || nilai! > 100)) {
+        throw new ApiTolak(400, `Nilai untuk kriteria ${criterion.kode} harus di antara 1 dan 100.`);
+      }
+      const assessment = await tx.assessment.upsert({
+        where: {
+          sessionId_userId_vendorId_criterionId: {
+            sessionId: active.id,
+            userId: user.id,
+            vendorId,
+            criterionId: criterionId!,
+          },
+        },
+        create: {
+          sessionId: active.id,
+          userId: user.id,
+          vendorId,
+          criterionId: criterionId!,
+          nilai: nilai!,
+          alasan: alasan ?? null,
+        },
+        update: { nilai: nilai!, ...(alasan !== undefined ? { alasan } : {}) },
+      });
+      await recordAudit(active.id, user.id, "simpan_nilai", { vendorId, criterionId, nilai }, tx);
+      return { type: "nilai" as const, assessment };
     });
-    return apiJson({ ok: true, type: "alasan" });
-  }
 
-  // Kasus 2: Update sel nilai (dan opsional alasan)
-  if (typeof criterionId !== "number" || typeof nilai !== "number" || !Number.isFinite(nilai)) {
-    return apiError(400, "criterionId dan nilai numerik valid wajib disertakan.");
-  }
-
-  if (nilai <= 0) {
-    return apiError(400, "Nilai harus lebih besar dari 0.");
-  }
-
-  // Validasi criterion C2..C5 biasanya skor 1..100
-  const criterion = await prisma.criteria.findUnique({ where: { id: criterionId } });
-  if (!criterion) return apiError(404, "Kriteria tidak ditemukan.");
-
-  if (criterion.kode !== "C1" && (nilai < 1 || nilai > 100)) {
-    return apiError(400, `Nilai untuk kriteria ${criterion.kode} harus di antara 1 dan 100.`);
-  }
-
-  const assessment = await prisma.assessment.upsert({
-    where: {
-      sessionId_userId_vendorId_criterionId: {
-        sessionId: session.id,
-        userId: user.id,
-        vendorId,
-        criterionId,
+    if (result.type === "alasan") return apiJson({ ok: true, type: "alasan" });
+    return apiJson({
+      ok: true,
+      assessment: {
+        id: result.assessment.id,
+        vendorId: result.assessment.vendorId,
+        criterionId: result.assessment.criterionId,
+        nilai: Number(result.assessment.nilai),
+        alasan: result.assessment.alasan,
       },
-    },
-    create: {
-      sessionId: session.id,
-      userId: user.id,
-      vendorId,
-      criterionId,
-      nilai,
-      alasan: alasan ?? null,
-    },
-    update: {
-      nilai,
-      ...(alasan !== undefined ? { alasan } : {}),
-    },
-  });
-
-  await recordAudit(session.id, user.id, "simpan_nilai", {
-    vendorId,
-    criterionId,
-    nilai,
-  });
-
-  return apiJson({
-    ok: true,
-    assessment: {
-      id: assessment.id,
-      vendorId: assessment.vendorId,
-      criterionId: assessment.criterionId,
-      nilai: Number(assessment.nilai),
-      alasan: assessment.alasan,
-    },
-  });
+    });
+  } catch (error) {
+    if (error instanceof ApiTolak) return apiError(error.status, error.message);
+    throw error;
+  }
 }

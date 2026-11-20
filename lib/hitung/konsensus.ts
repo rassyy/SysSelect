@@ -31,6 +31,9 @@ export async function hitungDanSimpanKonsensus(
   actorId: number,
 ): Promise<HasilKonsensus> {
   return prisma.$transaction(async (tx) => {
+    // Serialize against concurrent open requests and assessment PATCH/submit.
+    // Lock same session row as those write paths before authoritative guards.
+    await tx.$queryRaw<Array<{ id: number }>>`SELECT id FROM sessions WHERE id = ${sessionId} FOR UPDATE`;
     const session = await tx.session.findUniqueOrThrow({ where: { id: sessionId } });
     if (session.status !== "penilaian") {
       throw new KonsensusError(409, "Buka konsensus hanya bisa dilakukan pada fase penilaian.");
@@ -72,12 +75,21 @@ export async function hitungDanSimpanKonsensus(
         }),
       }));
       const hasil = hitungSAW(matriks, kriteria);
+      // Kontrak presisi: skor SAW disimpan Decimal(12,6), jadi bulatkan
+      // sebelum menentukan rank dan Borda. Snapshot tersimpan harus bisa
+      // mereproduksi peringkat serta poin persis; ties pakai vendor_id ASC.
+      const skorBulat = hasil.V.map((v) => Math.round(v * 1e6) / 1e6);
+      const urutan = skorBulat
+        .map((skor, i) => ({ skor, vendorId: vendors[i].id, i }))
+        .sort((a, b) => b.skor - a.skor || a.vendorId - b.vendorId);
+      const rankBulat = new Array<number>(vendors.length);
+      urutan.forEach((row, pos) => { rankBulat[row.i] = pos + 1; });
       vendors.forEach((v, i) => {
         sawRows.push({
           userId: u.id,
           vendorId: v.id,
-          skor: hasil.V[i],
-          peringkat: hasil.peringkat[i],
+          skor: skorBulat[i],
+          peringkat: rankBulat[i],
         });
       });
     }
@@ -159,5 +171,5 @@ export async function hitungDanSimpanKonsensus(
       sawCount: sawRows.length,
       bordaCount: vendorIds.length,
     };
-  });
+  }, { timeout: 15000 });
 }

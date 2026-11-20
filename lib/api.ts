@@ -10,6 +10,18 @@ import { SESSION_COOKIE, verifySession } from "@/lib/session-token";
 
 export type ApiFailure = { ok: false; status: number; error: string };
 
+/**
+ * Penolakan guard di DALAM transaksi: dilempar agar transaksi rollback,
+ * lalu dipetakan route menjadi apiError(status, message).
+ */
+export class ApiTolak extends Error {
+  status: number;
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+  }
+}
+
 export function apiJson(data: unknown, status = 200): NextResponse {
   return NextResponse.json(data, { status });
 }
