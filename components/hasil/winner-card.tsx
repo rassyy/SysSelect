@@ -25,7 +25,7 @@ export function WinnerCard({ data }: { data: DataHasil }) {
               PILIHAN
             </Badge>
             <h2 className="text-display">
-              <span className="mono">{winner.kode}</span>
+              <span className="mono num">{winner.kode}</span>
               <span className="mx-2 text-ink-3" aria-hidden="true">·</span>
               {winner.namaVendor}
             </h2>

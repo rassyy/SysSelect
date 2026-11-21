@@ -97,7 +97,7 @@ export function KriteriaForm({
             <TableBody>
               {initialCriteria.map((item) => (
                 <TableRow key={item.kode}>
-                  <TableCell className="mono font-semibold text-ink">{item.kode}</TableCell>
+                  <TableCell className="mono num font-semibold text-ink">{item.kode}</TableCell>
                   <TableCell>
                     <p className="font-medium text-ink">{item.nama}</p>
                     {item.kode === "C1" ? (
@@ -123,7 +123,7 @@ export function KriteriaForm({
                         disabled={!isSetupPhase || loading}
                         value={weights[item.kode] ?? ""}
                         onChange={(e) => handleChange(item.kode, e.target.value)}
-                        className="h-9 w-24 rounded-input border border-hairline bg-surface px-2.5 text-right font-mono text-[13px] font-medium text-ink focus-ring disabled:bg-track disabled:text-ink-3"
+                        className="h-9 w-24 rounded-input border border-hairline bg-surface px-2.5 text-right font-mono text-[13px] font-medium text-ink num focus-ring disabled:bg-track disabled:text-ink-3"
                       />
                       <span className="text-ink-3 text-small mono">%</span>
                     </div>

@@ -43,11 +43,6 @@ function waktu(date: Date | null): string {
 }
 
 export function buildBeritaAcaraHtml(data: DataHasil, dicetakOleh: string): string {
-  const dmKeys = ["CTO", "HEAD_IT", "FINANCE"];
-  const kriteriaHead = data.criteria
-    .map((c) => `<th class="num"><span>${esc(c.kode)}</span><br><small>${c.bobot}%</small></th>`)
-    .join("");
-
   const kriteriaRows = data.criteria
     .map(
       (c) => `<tr>

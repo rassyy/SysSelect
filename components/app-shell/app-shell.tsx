@@ -47,7 +47,7 @@ function Identity({ user, compact = false }: { user: User; compact?: boolean }) 
         <p className="truncate text-[12.5px] font-medium text-ink">
           {user.namaLengkap}
         </p>
-        <p className="truncate text-[11px] text-ink-3">{user.jabatan}</p>
+        <p className="truncate text-[11px] text-ink-2">{user.jabatan}</p>
       </div>
     </div>
   );

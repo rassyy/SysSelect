@@ -21,7 +21,8 @@
     "test:t13": "tsx scripts/test-t13.ts",
     "test:t14": "tsx scripts/test-t14.ts",
     "test:t15": "tsx scripts/test-t15.ts",
-    "test:t16": "tsx scripts/test-t16.ts"
+    "test:t16": "tsx scripts/test-t16.ts",
+    "test:t17": "tsx scripts/test-t17.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

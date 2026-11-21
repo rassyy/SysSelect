@@ -25,15 +25,15 @@ export function RankingTable({ rows }: { rows: DataHasil["bordaRows"] }) {
               <span
                 className={
                   row.peringkat === 1
-                    ? "inline-flex h-[19px] min-w-[19px] items-center justify-center rounded-badge bg-ink px-1 font-mono text-[10.5px] font-bold text-surface"
-                    : "inline-flex h-[19px] min-w-[19px] items-center justify-center rounded-badge bg-track px-1 font-mono text-[10.5px] font-bold text-ink-2"
+                    ? "inline-flex h-[19px] min-w-[19px] items-center justify-center rounded-badge bg-ink px-1 font-mono text-[10.5px] font-bold text-surface num"
+                    : "inline-flex h-[19px] min-w-[19px] items-center justify-center rounded-badge bg-track px-1 font-mono text-[10.5px] font-bold text-ink-2 num"
                 }
               >
                 {row.peringkat}
               </span>
             </TableCell>
             <TableCell>
-              <span className="mono font-semibold">{row.kode}</span>
+              <span className="mono num font-semibold">{row.kode}</span>
               <span className="ml-2 text-[13px] font-semibold">{row.nama}</span>
               {row.peringkat === 1 ? (
                 <Badge variant="winner" className="ml-2 align-middle">

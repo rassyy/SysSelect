@@ -160,7 +160,7 @@ export default async function AuditPage({
                         {log.detail === null ? (
                           <span className="text-small text-ink-2">—</span>
                         ) : (
-                          <pre className="max-w-[520px] whitespace-pre-wrap break-words rounded-input bg-surface-2 px-2 py-1.5 font-mono text-[11px] leading-relaxed text-ink-2">
+                          <pre className="max-w-[520px] whitespace-pre-wrap break-words rounded-input bg-surface-2 px-2 py-1.5 font-mono num text-[11px] leading-relaxed text-ink-2">
                             {JSON.stringify(log.detail, null, 2)}
                           </pre>
                         )}

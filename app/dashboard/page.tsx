@@ -170,7 +170,7 @@ export default async function DashboardPage() {
             <p className="text-ink-2">{user.jabatan}</p>
             <div className="pt-2 flex items-center gap-2">
               <DmRankBadge role={ROLE_BY_RANK[user.rankJabatan] ?? "finance"} rank={user.rankJabatan} />
-              <span className="mono text-ink-3 text-[11.5px]">
+              <span className="mono num text-ink-3 text-[11.5px]">
                 rank_{user.rankJabatan} · @{user.username}
               </span>
             </div>
@@ -188,7 +188,7 @@ export default async function DashboardPage() {
               <span className="text-hero-num num mono font-bold text-ink">
                 {submitCount}
               </span>
-              <span className="text-[16px] text-ink-3 mono font-medium">
+              <span className="mono num text-[16px] font-medium text-ink-3">
                 / {overview?.dmCount ?? 3}
               </span>
             </div>
@@ -236,7 +236,7 @@ export default async function DashboardPage() {
             <p>
               Nilai decision maker lain disaring pada lapisan database (server-side guard) dan tidak pernah dikirimkan ke peramban selama fase penilaian.
             </p>
-            <p className="text-[11.5px] text-ink-3 pt-1 border-t border-hairline">
+            <p className="text-[11.5px] text-ink-2 pt-1 border-t border-hairline">
               Master data eksklusif rank 3. Konsensus Borda Count baru terbuka setelah 3/3 DM submit.
             </p>
           </CardContent>
@@ -255,7 +255,7 @@ export default async function DashboardPage() {
               {recentAudits.map((a) => (
                 <div key={a.id} className="flex items-center justify-between px-5 py-2.5 hover:bg-surface-2 transition-colors">
                   <div className="flex items-center gap-2.5">
-                    <span className="mono text-ink-3 text-[11px]">
+                    <span className="mono num text-ink-3 text-[11px]">
                       {new Date(a.createdAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
                     </span>
                     <span className="mono font-medium text-ink">{a.aksi}</span>
@@ -263,7 +263,7 @@ export default async function DashboardPage() {
                       oleh {a.user.namaLengkap.split(" ")[0]} ({a.user.jabatan})
                     </span>
                   </div>
-                  <span className="mono text-[10.5px] text-ink-3">
+                  <span className="mono num text-[10.5px] text-ink-3">
                     {new Date(a.createdAt).toLocaleDateString("id-ID")}
                   </span>
                 </div>

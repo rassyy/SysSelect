@@ -45,7 +45,7 @@ function TabelAngka({
           <tbody>
             {rincian.raw.map((_, vi) => (
               <tr key={vi} className="border-b border-hairline last:border-0">
-                <th scope="row" className="px-2.5 py-1.5 text-left mono font-semibold">
+                <th scope="row" className="px-2.5 py-1.5 text-left mono num font-semibold">
                   V{vi + 1}
                 </th>
                 {nilai(rincian, vi).map((x, j) => (

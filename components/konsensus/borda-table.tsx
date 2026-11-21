@@ -34,7 +34,7 @@ export function BordaTable({
           {Array.from({ length: n }, (_, i) => (
             <TableHead key={i} className="text-right">
               Grup {i + 1}
-              <span className="mono ml-1 font-normal text-ink-3">×{bobotBorda[i + 1]}</span>
+              <span className="mono num ml-1 font-normal text-ink-3">×{bobotBorda[i + 1]}</span>
             </TableHead>
           ))}
           <TableHead className="text-right">Poin</TableHead>

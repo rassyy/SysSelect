@@ -80,7 +80,7 @@ export function SahkanPanel({ winnerLabel }: { winnerLabel: string }) {
             </p>
           ) : null}
           <div className="mt-5 flex justify-end gap-2">
-            <Button variant="secondary" onClick={tutup} disabled={busy}>
+            <Button variant="secondary" onClick={tutup} disabled={busy} disabledReason="Pengesahan sedang diproses.">
               Batal
             </Button>
             <Button onClick={sahkan} disabled={busy} disabledReason="Pengesahan sedang diproses.">

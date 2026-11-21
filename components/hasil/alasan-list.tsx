@@ -20,9 +20,9 @@ export function AlasanList({ data }: { data: DataHasil }) {
               return (
                 <div key={vendor.id} className="grid gap-1 px-1 py-2 sm:grid-cols-[120px_1fr] sm:gap-3">
                   <dt className="text-[12.5px] font-medium text-ink">
-                    <span className="mono">{vendor.kode}</span> · {vendor.nama}
+                    <span className="mono num">{vendor.kode}</span> · {vendor.nama}
                   </dt>
-                  <dd className={alasan ? "text-small text-ink-2" : "text-small text-ink-3"}>
+                  <dd className={alasan ? "text-small text-ink-2" : "text-small text-ink-2"}>
                     {alasan ?? "Tanpa alasan tertulis."}
                   </dd>
                 </div>
