@@ -145,6 +145,10 @@ body::after {
   box-shadow: var(--shadow-raised);
 }
 
+dialog::backdrop {
+  background: rgba(26, 24, 21, 0.3);
+}
+
 .focus-ring:focus-visible {
   outline: none;
   border-color: var(--ink);

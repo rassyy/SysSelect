@@ -18,6 +18,7 @@ import { RankingTable } from "@/components/hasil/ranking-table";
 import { RincianAccordion } from "@/components/hasil/rincian-accordion";
 import { AlasanList } from "@/components/hasil/alasan-list";
 import { LogList } from "@/components/hasil/log-list";
+import { SahkanPanel } from "@/components/hasil/sahkan-panel";
 
 export const metadata: Metadata = {
   title: "Hasil · SysSelect GDSS",
@@ -67,6 +68,9 @@ export default async function HasilPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          {data.status === "konsensus" && user.rankJabatan === 3 ? (
+            <SahkanPanel winnerLabel={`${data.winner.kode} ${data.winner.namaVendor}`} />
+          ) : null}
           <ReplayLink sessionId={data.sessionId} />
         </div>
       </div>

@@ -88,7 +88,7 @@ export async function pulihkanSetup(sessionId: number): Promise<void> {
     prisma.auditLog.deleteMany({
       where: {
         sessionId,
-        aksi: { in: ["mulai_penilaian", "submit_penilaian", "buka_konsensus", "hitung_borda", "simpan_nilai"] },
+        aksi: { in: ["mulai_penilaian", "submit_penilaian", "buka_konsensus", "hitung_borda", "simpan_nilai", "sahkan_keputusan"] },
       },
     }),
     prisma.bordaResult.deleteMany({ where: { sessionId } }),
@@ -96,7 +96,7 @@ export async function pulihkanSetup(sessionId: number): Promise<void> {
     prisma.submission.deleteMany({ where: { sessionId } }),
     prisma.session.update({
       where: { id: sessionId },
-      data: { status: "setup", openedBy: null, openedAt: null, winnerVendorId: null },
+      data: { status: "setup", openedBy: null, openedAt: null, winnerVendorId: null, ratifiedBy: null, ratifiedAt: null },
     }),
   ]);
   const counts = await Promise.all([

@@ -106,7 +106,7 @@ export default async function DashboardPage() {
     if (user.rankJabatan === 3) {
       actionButton = {
         label: "Sahkan Keputusan",
-        href: "/konsensus",
+        href: "/hasil",
       };
     } else {
       actionButton = {
