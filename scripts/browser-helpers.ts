@@ -88,7 +88,7 @@ export async function pulihkanSetup(sessionId: number): Promise<void> {
     prisma.auditLog.deleteMany({
       where: {
         sessionId,
-        aksi: { in: ["mulai_penilaian", "submit_penilaian", "buka_konsensus", "hitung_borda", "simpan_nilai", "sahkan_keputusan"] },
+        aksi: { in: ["mulai_penilaian", "submit_penilaian", "buka_konsensus", "hitung_borda", "simpan_nilai", "sahkan_keputusan", "simpan_kriteria", "simpan_vendor", "login"] },
       },
     }),
     prisma.bordaResult.deleteMany({ where: { sessionId } }),
