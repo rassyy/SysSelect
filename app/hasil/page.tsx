@@ -19,6 +19,7 @@ import { RincianAccordion } from "@/components/hasil/rincian-accordion";
 import { AlasanList } from "@/components/hasil/alasan-list";
 import { LogList } from "@/components/hasil/log-list";
 import { SahkanPanel } from "@/components/hasil/sahkan-panel";
+import { ExportBeritaAcara } from "@/components/hasil/export-berita-acara";
 
 export const metadata: Metadata = {
   title: "Hasil · SysSelect GDSS",
@@ -72,6 +73,7 @@ export default async function HasilPage() {
             <SahkanPanel winnerLabel={`${data.winner.kode} ${data.winner.namaVendor}`} />
           ) : null}
           <ReplayLink sessionId={data.sessionId} />
+          <ExportBeritaAcara />
         </div>
       </div>
 
