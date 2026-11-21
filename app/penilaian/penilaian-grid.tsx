@@ -301,8 +301,8 @@ export function PenilaianGrid({
                       <TableHead key={c.kode} className="min-w-[140px] text-right">
                         <div className="flex flex-col items-end gap-1">
                           <div className="flex items-center gap-1.5">
-                            <span className="mono font-bold text-ink">{c.kode}</span>
-                            <span className="mono text-[11px] text-ink-3">({c.bobot}%)</span>
+                            <span className="mono num font-bold text-ink">{c.kode}</span>
+                            <span className="mono num text-[11px] text-ink-3">({c.bobot}%)</span>
                           </div>
                           <div className="flex items-center gap-1 text-[10.5px]">
                             <Badge variant="default" className="px-1.5 py-0 text-[10px]">
@@ -320,8 +320,8 @@ export function PenilaianGrid({
                     <React.Fragment key={v.kode}>
                       <TableRow>
                         <TableCell className="align-middle">
-                          <span className="mono font-bold text-ink">{v.kode}</span>
-                          <p className="text-[11px] text-ink-3 leading-tight truncate max-w-[90px]">
+                          <span className="mono num font-bold text-ink">{v.kode}</span>
+                          <p className="text-[11px] text-ink-2 leading-tight truncate max-w-[90px]">
                             {v.nama.replace(/^PT\s+/, "")}
                           </p>
                         </TableCell>
@@ -442,7 +442,7 @@ export function PenilaianGrid({
         <div className="space-y-4">
           <div>
             <h2 className="text-[15px] font-semibold text-ink mb-1">Decision Maker Lain</h2>
-            <p className="text-small text-ink-3">
+            <p className="text-small text-ink-2">
               Kartu tersegel untuk menjaga independensi.
             </p>
           </div>
@@ -457,7 +457,7 @@ export function PenilaianGrid({
                       <DmRankBadge role={role} rank={dm.rankJabatan} />
                       <div>
                         <p className="text-[13px] font-semibold text-ink">{dm.namaLengkap}</p>
-                        <p className="text-[11px] text-ink-3">{dm.jabatan}</p>
+                        <p className="text-[11px] text-ink-2">{dm.jabatan}</p>
                       </div>
                     </div>
                   </div>
@@ -480,7 +480,7 @@ export function PenilaianGrid({
                         Lihat nilai
                       </Link>
                     ) : (
-                      <span className="mono text-[11px] font-medium text-ink-3">
+                      <span className="mono text-[11px] font-medium text-ink-2">
                         {dm.submitted ? "Tersimpan" : "Sedang Mengisi"}
                       </span>
                     )}
@@ -499,7 +499,7 @@ export function PenilaianGrid({
               • Gunakan tombol <kbd className="mono bg-track px-1 rounded">Tab</kbd> atau tombol panah untuk berpindah sel.
             </p>
             <p>
-              • Nilai tersimpan secara otomatis setelah Anda mengetik (<span className="mono">autosave 600ms</span>).
+              • Nilai tersimpan secara otomatis setelah Anda mengetik (<span className="mono num">autosave 600ms</span>).
             </p>
             <p>
               • Setelah submit, seluruh 20 sel akan terkunci dan tidak dapat diubah lagi.
@@ -525,10 +525,10 @@ export function PenilaianGrid({
             </div>
 
             <div className="flex justify-end gap-2.5 pt-2">
-              <Button variant="secondary" onClick={() => setDialogOpen(false)} disabled={loading}>
+              <Button variant="secondary" onClick={() => setDialogOpen(false)} disabled={loading} disabledReason="Submit sedang diproses.">
                 Batal
               </Button>
-              <Button variant="primary" onClick={handleFinalSubmit} disabled={loading}>
+              <Button variant="primary" onClick={handleFinalSubmit} disabled={loading} disabledReason="Submit sedang diproses.">
                 {loading ? "Memproses..." : "Ya, Submit Sekarang"}
               </Button>
             </div>

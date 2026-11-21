@@ -79,7 +79,7 @@ export function PhaseRail({
         const dot = (
           <span
             className={cn(
-              "flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full font-mono text-[10px] font-bold",
+              "flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full font-mono text-[10px] font-bold num",
               state === "terkunci"
                 ? "border border-hairline-2 bg-canvas text-ink-3"
                 : "bg-ink text-surface",

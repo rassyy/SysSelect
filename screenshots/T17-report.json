@@ -1,0 +1,238 @@
+{
+  "waktu": "2026-11-21T10:29:21.179Z",
+  "item8": [
+    [
+      1,
+      {
+        "lulus": true,
+        "bukti": "0 kemunculan gradien di 62 berkas"
+      }
+    ],
+    [
+      2,
+      {
+        "lulus": true,
+        "bukti": "0 backdrop-blur/backdrop-filter; dialog::backdrop hanya rgba(26,24,21,.3)"
+      }
+    ],
+    [
+      3,
+      {
+        "lulus": true,
+        "bukti": "0 emoji; semua ikon lucide-react (SVG), panah cost/benefit karakter teks ↓/↑"
+      }
+    ],
+    [
+      4,
+      {
+        "lulus": true,
+        "bukti": "0 rounded-2xl/3xl; globals.css --radius-card: 10px; rounded-full hanya titik fase/legenda 9-18px"
+      }
+    ],
+    [
+      5,
+      {
+        "lulus": true,
+        "bukti": "blur terbesar 28px (card 14px, raised 28px); semua shadow rgba(26,24,21,...) atau putih; 4 layer diperiksa"
+      }
+    ],
+    [
+      6,
+      {
+        "lulus": true,
+        "bukti": "browser /konsensus: 3 warna fill unik (rgb(30, 58, 95) · rgb(155, 76, 119) · rgb(239, 211, 168)); tanpa library chart"
+      }
+    ],
+    [
+      7,
+      {
+        "lulus": true,
+        "bukti": "dashboard grid md:grid-cols-3: kartu identitas login, progres n/3 dari submissions, integritas GDSS (+1 kartu audit log); 0 grid-cols-4; 1 angka hero = submitCount DB nyata"
+      }
+    ],
+    [
+      8,
+      {
+        "lulus": true,
+        "bukti": "/login start · /dashboard start · /setup/kriteria start · /penilaian start; login tanpa paragraf ink-3"
+      }
+    ],
+    [
+      9,
+      {
+        "lulus": true,
+        "bukti": "0 bounce/elastic/wiggle; framer-motion spring stiffness 260 damping 30 (critically damped), easeOutCubic"
+      }
+    ],
+    [
+      10,
+      {
+        "lulus": true,
+        "bukti": "setelah 2.6s reveal berhenti: data-reveal=final, tidak kembali playing"
+      }
+    ],
+    [
+      11,
+      {
+        "lulus": true,
+        "bukti": "browser /hasil: badge PILIHAN bg rgb(26, 24, 21) teks rgb(255, 255, 255), nilai 30px mono, shadow rgba(26, 24, 21, 0.05) 0px 2px 4px 0px, rgba(26, 24, 21, 0.1..."
+      }
+    ],
+    [
+      12,
+      {
+        "lulus": true,
+        "bukti": "0 kelas palet hijau/merah; cost/benefit = ArrowDown/ArrowUp + teks"
+      }
+    ],
+    [
+      13,
+      {
+        "lulus": true,
+        "bukti": "HTML /hasil tanpa referensi font CDN (Geist dari npm, ikon SVG inline); PDF embed woff2 base64"
+      }
+    ],
+    [
+      14,
+      {
+        "lulus": true,
+        "bukti": "sumber: 0 referensi library chart (recharts/chart.js/d3/nivo/victory); semua visual chart = div + framer-motion (borda-chart.tsx)"
+      }
+    ],
+    [
+      21,
+      {
+        "lulus": true,
+        "bukti": "phase rail fase setup memuat: menunggu master data · menunggu 3/3 · menunggu konsensus"
+      }
+    ],
+    [
+      15,
+      {
+        "lulus": true,
+        "bukti": "0 paragraf ink-3 di 6 halaman; ink-3 hanya label-caps/uppercase, metadata kecil, ikon, disabled; teks body = ink 17.72:1 / ink-2 5.77:1"
+      }
+    ],
+    [
+      16,
+      {
+        "lulus": true,
+        "bukti": "280 elemen angka murni diperiksa (dashboard, setup, penilaian, hasil), 0 tanpa tabular-nums"
+      }
+    ],
+    [
+      20,
+      {
+        "lulus": true,
+        "bukti": "0 <Button disabled> tanpa disabledReason; 0 button[disabled] tanpa title di /penilaian; tooltip = atribut title (Button.tsx 51)"
+      }
+    ],
+    [
+      19,
+      {
+        "lulus": true,
+        "bukti": "panjang fill proporsional ke maksimum vendor: V3 100.00% · V1 88.47% · V4 57.92% · V2 47.34%; test:t11 memverifikasi normalisasi terhadap skor maksimum"
+      }
+    ],
+    [
+      17,
+      {
+        "lulus": true,
+        "bukti": "browser: min 72.3px semua label tampil; test:t11 OK 6 layar 500px — label <36px tersembunyi runtime, tooltip tetap"
+      }
+    ],
+    [
+      18,
+      {
+        "lulus": true,
+        "bukti": "browser legenda: CTO— Chief Technology OfficerHIT— Head of IT InfrastructureFIN— Finance Manager; test:t11 OK 3"
+      }
+    ],
+    [
+      22,
+      {
+        "lulus": true,
+        "bukti": "link 'Putar ulang' (href=/konsensus, RotateCcw) ada di /hasil"
+      }
+    ],
+    [
+      23,
+      {
+        "lulus": true,
+        "bukti": "emulateMediaFeatures reduce -> data-reveal=final, batang V3 langsung 802.0px"
+      }
+    ]
+  ],
+  "item9": [
+    [
+      9,
+      {
+        "lulus": true,
+        "bukti": "20 sel input aktif di fase penilaian; ArrowDown 0->5, Tab 5->6, focus-visible border rgb(26, 24, 21) + shadow rgba(26, 24, 21, 0.07) 0px 0px 0px 3px; input angka + autosave PATCH"
+      }
+    ],
+    [
+      1,
+      {
+        "lulus": true,
+        "bukti": "screenshots/T17-konsensus.png; 3 warna DM (rgb(30, 58, 95), rgb(155, 76, 119), rgb(239, 211, 168)), sisanya netral"
+      }
+    ],
+    [
+      2,
+      {
+        "lulus": true,
+        "bukti": "V3 100.00% · V1 88.47% · V4 57.92% · V2 47.34%"
+      }
+    ],
+    [
+      3,
+      {
+        "lulus": true,
+        "bukti": "V4 Finance = 68.46% dari batang (dominan)"
+      }
+    ],
+    [
+      4,
+      {
+        "lulus": true,
+        "bukti": "docs/final_palette.py: ink 17.72:1, ink-2 5.77:1, dm-cto 8.08:1, dm-headit 9.22:1, dm-finance 5.42:1, badge 4.85-8.06:1; ink-3 3.04:1 hanya metadata non-esensial; 0 paragraf ink-3"
+      }
+    ],
+    [
+      7,
+      {
+        "lulus": true,
+        "bukti": "reduce -> state akhir langsung (data-reveal=final); test:t12 memverifikasi hal sama"
+      }
+    ],
+    [
+      6,
+      {
+        "lulus": true,
+        "bukti": "test:t12 — reveal 2.6s lalu final; tombol Putar ulang di /konsensus & /hasil memutar ulang; screenshot T17-konsensus.png"
+      }
+    ],
+    [
+      5,
+      {
+        "lulus": true,
+        "bukti": "test:t11 OK 5 — HC fill #176fea/#4c0b31/#f8cf95, label putih/putih/tinta, toggle aria-checked + persist localStorage; rasio pasangan HC 3.21:1 (cto-headit), 3.19:1 (cto-finance), 10.25:1 (headit-finance) — semua >=3:1"
+      }
+    ],
+    [
+      8,
+      {
+        "lulus": true,
+        "bukti": "semua request non-lokal diblokir; 0 request eksternal dicoba; /hasil tetap render, body font = GeistSans"
+      }
+    ],
+    [
+      10,
+      {
+        "lulus": true,
+        "bukti": "23/23 item §8 tercatat, 0 gagal"
+      }
+    ]
+  ]
+}

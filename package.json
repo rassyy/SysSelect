@@ -17,7 +17,12 @@
     "test:t09": "tsx scripts/test-t09.ts",
     "test:t10": "tsx scripts/test-t10.ts",
     "test:t11": "tsx scripts/test-t11.ts",
-    "test:t12": "tsx scripts/test-t12.ts"
+    "test:t12": "tsx scripts/test-t12.ts",
+    "test:t13": "tsx scripts/test-t13.ts",
+    "test:t14": "tsx scripts/test-t14.ts",
+    "test:t15": "tsx scripts/test-t15.ts",
+    "test:t16": "tsx scripts/test-t16.ts",
+    "test:t17": "tsx scripts/test-t17.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -29,6 +34,7 @@
     "geist": "^1",
     "lucide-react": "^0.468",
     "next": "15.5.29",
+    "puppeteer-core": "^25.18.1",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },
@@ -41,7 +47,6 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.29",
     "prisma": "^6",
-    "puppeteer-core": "^25.18.1",
     "tailwindcss": "^4",
     "tsx": "^4",
     "typescript": "^5"

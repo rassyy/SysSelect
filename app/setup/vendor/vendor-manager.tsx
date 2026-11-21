@@ -129,7 +129,7 @@ export function VendorManager({
                 const isEditing = editingId === v.id;
                 return (
                   <TableRow key={v.kode}>
-                    <TableCell className="mono font-bold text-ink align-top pt-3.5">{v.kode}</TableCell>
+                    <TableCell className="mono num font-bold text-ink align-top pt-3.5">{v.kode}</TableCell>
                     <TableCell className="align-top pt-3">
                       {isEditing ? (
                         <input
@@ -165,6 +165,7 @@ export function VendorManager({
                               className="h-7 px-2.5 text-[11.5px]"
                               onClick={() => handleSaveVendor(v.id, v.kode)}
                               disabled={loading}
+                              disabledReason="Penyimpanan vendor sedang diproses."
                             >
                               Simpan
                             </Button>
@@ -173,6 +174,7 @@ export function VendorManager({
                               className="h-7 px-2 text-[11.5px]"
                               onClick={() => setEditingId(null)}
                               disabled={loading}
+                              disabledReason="Penyimpanan vendor sedang diproses."
                             >
                               Batal
                             </Button>
@@ -224,8 +226,8 @@ export function VendorManager({
               )}
               <div>
                 <p className="font-medium">5 Kriteria Valid</p>
-                <p className="text-[11.5px] text-ink-3">
-                  Total bobot: <span className="mono font-medium">{sumBobot}%</span> (harus 100%)
+                <p className="text-[11.5px] text-ink-2">
+                  Total bobot: <span className="mono num font-medium">{sumBobot}%</span> (harus 100%)
                 </p>
               </div>
             </div>
@@ -245,8 +247,8 @@ export function VendorManager({
               )}
               <div>
                 <p className="font-medium">4 Alternatif Vendor</p>
-                <p className="text-[11.5px] text-ink-3">
-                  Terdaftar: <span className="mono font-medium">{vendors.length}</span> vendor
+                <p className="text-[11.5px] text-ink-2">
+                  Terdaftar: <span className="mono num font-medium">{vendors.length}</span> vendor
                 </p>
               </div>
             </div>
@@ -266,7 +268,7 @@ export function VendorManager({
           ) : null}
 
           <div className="flex items-center justify-between border-t border-hairline pt-4">
-            <p className="text-small text-ink-3">
+            <p className="text-small text-ink-2">
               {isSetupPhase
                 ? "Setelah dimulai, transisi ke fase 'penilaian' dan master data dikunci."
                 : "Fase penilaian sudah aktif."}
@@ -312,6 +314,7 @@ export function VendorManager({
                 variant="secondary"
                 onClick={() => setConfirmOpen(false)}
                 disabled={loading}
+                disabledReason="Permintaan sedang diproses."
               >
                 Batal
               </Button>
@@ -319,6 +322,7 @@ export function VendorManager({
                 variant="primary"
                 onClick={handleMulaiPenilaian}
                 disabled={loading}
+                disabledReason="Permintaan sedang diproses."
               >
                 {loading ? "Memproses..." : "Ya, Mulai Penilaian"}
               </Button>

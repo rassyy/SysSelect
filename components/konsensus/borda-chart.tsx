@@ -207,7 +207,7 @@ function BarisChart({
       {/* Label vendor 112px */}
       <div className="min-w-0">
         <div className="flex items-center gap-1.5">
-          <span className="mono text-[13px] font-bold text-ink">{row.kode}</span>
+          <span className="mono num text-[13px] font-bold text-ink">{row.kode}</span>
           {winner ? (
             <motion.span
               data-testid="winner-badge"

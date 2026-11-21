@@ -52,7 +52,7 @@ export function DmRankBadge({
   return (
     <span
       className={cn(
-        "inline-flex h-[19px] w-[19px] items-center justify-center rounded-badge font-mono text-[10.5px] font-bold select-none",
+        "inline-flex h-[19px] w-[19px] items-center justify-center rounded-badge font-mono text-[10.5px] font-bold select-none num",
         roleStyles[role],
         className
       )}

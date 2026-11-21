@@ -91,7 +91,7 @@ export default async function LoginPage({
           </form>
         </div>
 
-        <p className="mt-4 text-center text-[11.5px] text-ink-3">
+        <p className="mt-4 text-[11.5px] text-ink-2">
           Sesi berakhir otomatis setelah 8 jam.
         </p>
       </div>

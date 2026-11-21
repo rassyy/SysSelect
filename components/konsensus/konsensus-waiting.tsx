@@ -94,7 +94,7 @@ export function KonsensusWaiting({
         <CardContent className="space-y-4">
           <div className="flex items-baseline gap-1.5">
             <span className="text-hero-num num mono font-bold text-ink">{submitted}</span>
-            <span className="mono text-[16px] font-medium text-ink-3">/ 3</span>
+            <span className="mono num text-[16px] font-medium text-ink-3">/ 3</span>
           </div>
 
           <div className="space-y-2 border-t border-hairline pt-3">
@@ -103,7 +103,7 @@ export function KonsensusWaiting({
                 <div className="flex items-center gap-2">
                   <DmRankBadge role={dm.role} rank={dm.rankJabatan} />
                   <span className="font-medium text-ink">{dm.namaLengkap}</span>
-                  <span className="text-[11px] text-ink-3">{dm.jabatan}</span>
+                  <span className="text-[11px] text-ink-2">{dm.jabatan}</span>
                 </div>
                 <span
                   className={cn(
